@@ -588,6 +588,88 @@
         display: grid;
         gap: 7px;
       }
+      /* Giảm độ đậm chữ để UI dễ đọc hơn */
+      body {
+        font-weight: 400;
+      }
+
+      .brand h1,
+      .sectionTitle h3,
+      .tableCard h4,
+      .heroPanel h3,
+      .modalHead h3,
+      .pdfGreetingFields h4 {
+        font-weight: 700;
+      }
+
+      .lead,
+      .sectionTitle p,
+      .tableCard p,
+      .hint,
+      .modalHead p,
+      .modalNote,
+      .pdfGreetingFields p {
+        font-weight: 400;
+      }
+
+      .field label,
+      .modalForm label {
+        font-weight: 700;
+      }
+
+      .field input,
+      .field select,
+      .modalForm input {
+        font:
+          600 16px "Segoe UI",
+          Arial,
+          sans-serif;
+      }
+
+      .field input::placeholder,
+      .modalForm input::placeholder {
+        font-weight: 500;
+      }
+
+      .btn {
+        font-weight: 700;
+      }
+
+      th {
+        font-weight: 700;
+      }
+
+      td,
+      td.money {
+        font-weight: 400;
+      }
+
+      .good,
+      .warn {
+        font-weight: 700;
+      }
+
+      .softBold {
+        font-weight: 600;
+        color: var(--ink);
+      }
+
+      .mini b,
+      .kpi b {
+        font-weight: 700;
+      }
+
+      .formula code {
+        font-weight: 600;
+      }
+
+      .heroStats b {
+        font-weight: 700;
+      }
+
+      .logo {
+        font-weight: 800;
+      }
       @media (max-width: 1180px) {
         .heroGrid,
         .layout,
@@ -655,7 +737,8 @@
           <p class="lead">
             Chọn mã căn từ giỏ hàng, chọn phương thức thanh toán; hệ thống tự
             tính chiết khấu, VAT, kinh phí bảo trì, tổng giá và lịch thanh toán
-            tham khảo theo logic file Excel <b>PTG VINHOMES Hóc Môn DEMO</b>.
+            tham khảo theo logic file Excel
+            <span class="softBold">PTG VINHOMES Hóc Môn DEMO</span>.
           </p>
           <div class="actions">
             <a class="btn primary" href="#calculator">Lập phiếu tính giá</a
@@ -673,8 +756,9 @@
             </div>
             <h3>Tự động hóa phiếu giá từ giỏ hàng & phương thức thanh toán</h3>
             <p>
-              Hỗ trợ sản phẩm <b>Thô</b> và <b>Giãn Xây</b>, bao gồm phương án
-              thanh toán sớm, chuẩn, vay 70%, vay 80% và vay 90% tham khảo.
+              Hỗ trợ sản phẩm <span class="softBold">Thô</span>
+              <span class="softBold">Giãn Xây</span>, bao gồm phương án thanh
+              toán sớm, chuẩn, vay 70%, vay 80% và vay 90% tham khảo.
             </p>
           </div>
           <div class="heroStats">
@@ -1007,7 +1091,7 @@
       });
       const numFmt = new Intl.NumberFormat("vi-VN");
       const EMAILJS_PUBLIC_KEY = "996QoomXWH2i332j9";
-      const EMAILJS_SERVICE_ID = "service_rze60nd";
+      const EMAILJS_SERVICE_ID = "service_x58dht6";
       const EMAILJS_TEMPLATE_ID = "template_fv5qqp8";
       if (window.emailjs) emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
       const VAT_RATE = 0.1,
@@ -1713,6 +1797,7 @@
         const p = input.product || {};
         const params = {
           to_email: "hoangphibtcland@gmail.com",
+          from_name: "BTCLAND VIETNAM",
           customer_name: customer.name,
           customer_phone: customer.phone,
           customer_email: customer.email,
