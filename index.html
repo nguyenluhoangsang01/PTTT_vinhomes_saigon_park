@@ -737,8 +737,7 @@
           <p class="lead">
             Chọn mã căn từ giỏ hàng, chọn phương thức thanh toán; hệ thống tự
             tính chiết khấu, VAT, kinh phí bảo trì, tổng giá và lịch thanh toán
-            tham khảo theo logic file Excel
-            <span class="softBold">PTG VINHOMES Hóc Môn DEMO</span>.
+            tham khảo.
           </p>
           <div class="actions">
             <a class="btn primary" href="#calculator">Lập phiếu tính giá</a
@@ -776,8 +775,8 @@
       <div class="sectionTitle">
         <h3>Công cụ lập phiếu tính giá</h3>
         <p>
-          Thông tin trong ô nhập là placeholder; chọn mã căn sẽ tự điền dữ liệu
-          tham khảo từ giỏ hàng.
+          Nhập giá bán chưa VAT, chọn phương thức thanh toán và hạng VinClub; hệ
+          thống sẽ tự động tính chiết khấu, VAT, KPBT và tổng giá thanh toán.
         </p>
       </div>
       <div class="layout">
@@ -804,15 +803,6 @@
                   placeholder="Nhập tên nhân viên tư vấn"
                   autocomplete="off"
                 />
-              </div>
-            </div>
-            <div class="field">
-              <label for="productSelect">Chọn mã căn / sản phẩm</label
-              ><select id="productSelect">
-                <option value="">Chọn mã căn từ giỏ hàng</option>
-              </select>
-              <div class="hint">
-                Dữ liệu lấy từ sheet GiO HANG / Trang tính1 trong file Excel.
               </div>
             </div>
             <div class="twoCols paymentFields">
@@ -861,32 +851,12 @@
               ><input
                 id="rawPriceInput"
                 inputmode="numeric"
-                placeholder="Tự điền theo mã căn hoặc nhập tay"
+                placeholder="Nhập giá bán chưa VAT"
                 autocomplete="off"
               />
             </div>
-            <div class="twoCols">
-              <div class="field">
-                <label for="landPriceInput">Giá đất trước VAT</label
-                ><input
-                  id="landPriceInput"
-                  inputmode="numeric"
-                  placeholder="Chỉ áp dụng giãn xây"
-                  autocomplete="off"
-                />
-              </div>
-              <div class="field">
-                <label for="buildPriceInput">Giá xây trước VAT</label
-                ><input
-                  id="buildPriceInput"
-                  inputmode="numeric"
-                  placeholder="Chỉ áp dụng giãn xây"
-                  autocomplete="off"
-                />
-              </div>
-            </div>
             <div id="inputError" class="error">
-              Vui lòng chọn sản phẩm hoặc nhập giá bán chưa VAT hợp lệ.
+              Vui lòng nhập giá bán chưa VAT hợp lệ.
             </div>
             <div class="miniGrid">
               <div class="mini">
@@ -918,10 +888,10 @@
             </div>
           </div>
           <div class="card tableCard">
-            <h4>Thông tin sản phẩm</h4>
+            <h4>Thông tin tính giá</h4>
             <p>
-              Thông tin tự động lấy từ giỏ hàng; bạn có thể chỉnh lại giá trong
-              ô nhập bên trái nếu cần mô phỏng.
+              Dữ liệu được tính trực tiếp từ giá bán chưa VAT và phương thức
+              thanh toán bạn chọn.
             </p>
             <div class="tableWrap">
               <table>
@@ -1404,25 +1374,21 @@
         const raw = onlyDigits(el.value);
         el.value = raw ? numFmt.format(Number(raw)) : "";
       }
-      function selectedProduct() {
-        return products.find((p) => p.ma === $("productSelect").value) || null;
-      }
       function inputData() {
-        const p = selectedProduct();
         return {
           customerDisplayName:
             $("customerDisplayName").value.trim() || "quý anh chị khách hàng",
           staffDisplayName:
             $("staffDisplayName").value.trim() || "Nhân viên BTCLAND",
-          product: p,
+          product: null,
           planKey: $("planSelect").value,
           vinclubTier: $("vinclubTier").value,
           vinclubRate: vinclubRates[$("vinclubTier").value] || 0,
           bookingAmount: parseMoney($("bookingAmount").value) || 300000000,
           giftAmount: parseMoney($("giftAmount").value) || 0,
-          rawPrice: parseMoney($("rawPriceInput").value) || (p ? p.raw : 0),
-          landPrice: parseMoney($("landPriceInput").value) || p?.land || 0,
-          buildPrice: parseMoney($("buildPriceInput").value) || p?.build || 0,
+          rawPrice: parseMoney($("rawPriceInput").value),
+          landPrice: 0,
+          buildPrice: 0,
         };
       }
       function calcPlan(input, planKey) {
@@ -1620,67 +1586,27 @@
         add("—", "TỔNG GIÁ THANH TOÁN", "100%", d.gross, "Đã gồm VAT + KPBT");
         return rows;
       }
-      function populateProducts() {
-        const sel = $("productSelect");
-        products.forEach((p) => {
-          const opt = document.createElement("option");
-          opt.value = p.ma;
-          opt.textContent = `${p.ma} · ${p.loai} · ${p.tcbg} · ${money(p.raw)}`;
-          sel.appendChild(opt);
-        });
-      }
-      function fillFromProduct() {
-        const p = selectedProduct();
-        if (!p) return;
-        $("rawPriceInput").value = numFmt.format(Math.round(p.raw));
-        $("landPriceInput").value = p.land
-          ? numFmt.format(Math.round(p.land))
-          : "";
-        $("buildPriceInput").value = p.build
-          ? numFmt.format(Math.round(p.build))
-          : "";
-        updateUI();
-      }
       function renderProduct(input) {
-        const p = input.product;
-        const rows = p
-          ? [
-              [
-                "Mã căn",
-                p.ma,
-                "Khu/Đường",
-                `${text(p.khu)} / ${text(p.duong)}`,
-              ],
-              ["Loại hình", p.loai, "TCBG", p.tcbg],
-              [
-                "Diện tích đất",
-                p.landArea ? `${p.landArea} m²` : "—",
-                "Diện tích xây dựng",
-                p.buildArea ? `${p.buildArea} m²` : "—",
-              ],
-              [
-                "Giá trước VAT",
-                money(input.rawPrice),
-                "Đại lý",
-                text(p.agency),
-              ],
-              [
-                "Giá đất trước VAT",
-                input.landPrice ? money(input.landPrice) : "—",
-                "Giá xây trước VAT",
-                input.buildPrice ? money(input.buildPrice) : "—",
-              ],
-            ]
-          : [
-              ["Mã căn", "—", "Khu/Đường", "—"],
-              ["Loại hình", "—", "TCBG", "—"],
-              [
-                "Giá trước VAT",
-                input.rawPrice ? money(input.rawPrice) : "—",
-                "Giá đất/xây",
-                "—",
-              ],
-            ];
+        const plan = planConfig[input.planKey];
+        const vinclubText =
+          $("vinclubTier").selectedOptions[0]?.textContent || "—";
+
+        const rows = [
+          [
+            "Giá bán chưa VAT",
+            input.rawPrice ? money(input.rawPrice) : "—",
+            "Phương thức thanh toán",
+            plan?.name || "—",
+          ],
+          ["Hạng VinClub", vinclubText, "Đặt cọc", money(input.bookingAmount)],
+          [
+            "Quà tặng mở bán",
+            money(input.giftAmount),
+            "Loại tính giá",
+            "Tính trực tiếp theo giá bán chưa VAT",
+          ],
+        ];
+
         $("productBody").innerHTML = rows
           .map(
             (r) =>
@@ -1727,10 +1653,7 @@
           return;
         }
         const d = calcPlan(input, input.planKey);
-        set(
-          "miniType",
-          `${input.product?.loai || "—"} / ${input.product?.tcbg || "—"}`,
-        );
+        set("miniType", planConfig[input.planKey]?.name || "—");
         set("miniTotal", money(d.gross));
         set("kpiRaw", money(input.rawPrice));
         set("kpiNet", money(d.net));
@@ -1743,10 +1666,7 @@
         [
           "customerDisplayName",
           "staffDisplayName",
-          "productSelect",
           "rawPriceInput",
-          "landPriceInput",
-          "buildPriceInput",
           "bookingAmount",
           "giftAmount",
         ].forEach((id) => ($(id).value = ""));
@@ -1794,7 +1714,6 @@
           );
         const input = inputData();
         const d = calcPlan(input, input.planKey);
-        const p = input.product || {};
         const params = {
           to_email: "hoangphibtcland@gmail.com",
           from_name: "BTCLAND VIETNAM",
@@ -1806,9 +1725,9 @@
           staff_name: input.staffDisplayName,
           project_name: "Vinhomes Saigon Park",
           quote_type: "Phiếu tính giá tham khảo",
-          ma_can: p.ma || "—",
-          loai_hinh: p.loai || "—",
-          tcbg: p.tcbg || "—",
+          ma_can: "—",
+          loai_hinh: "—",
+          tcbg: "Tính trực tiếp theo giá bán chưa VAT",
           selected_plan: d.config.name,
           total_price: money(d.gross),
           raw_price: money(input.rawPrice),
@@ -1903,7 +1822,7 @@
       function exportPDF(customer = null) {
         const input = inputData();
         const d = calcPlan(input, input.planKey);
-        const p = input.product || {};
+        const p = {};
         const now = new Date().toLocaleString("vi-VN");
         const plans = allPlans(input);
         const priceSummaryBody = plans.map((x) => [
@@ -1974,29 +1893,31 @@
                     makeTable(
                       ["Thông tin", "Giá trị"],
                       [
-                        [c("Mã căn", { bold: true }), c(p.ma || "—")],
                         [
-                          c("Khu/Đường", { bold: true }),
-                          c(`${text(p.khu)} / ${text(p.duong)}`),
-                        ],
-                        [
-                          c("Loại hình / TCBG", { bold: true }),
-                          c(`${p.loai || "—"} / ${p.tcbg || "—"}`),
-                        ],
-                        [
-                          c("Diện tích đất", { bold: true }),
-                          c(p.landArea ? `${p.landArea} m²` : "—"),
-                        ],
-                        [
-                          c("Diện tích xây dựng", { bold: true }),
-                          c(p.buildArea ? `${p.buildArea} m²` : "—"),
-                        ],
-                        [
-                          c("Giá trước VAT", { bold: true }),
+                          c("Giá bán chưa VAT", { bold: true }),
                           c(money(input.rawPrice), { alignment: "right" }),
                         ],
+                        [
+                          c("Phương thức thanh toán", { bold: true }),
+                          c(d.config.name),
+                        ],
+                        [
+                          c("Hạng VinClub", { bold: true }),
+                          c(
+                            $("vinclubTier").selectedOptions[0]?.textContent ||
+                              "—",
+                          ),
+                        ],
+                        [
+                          c("Đặt cọc", { bold: true }),
+                          c(money(input.bookingAmount), { alignment: "right" }),
+                        ],
+                        [
+                          c("Quà tặng mở bán", { bold: true }),
+                          c(money(input.giftAmount), { alignment: "right" }),
+                        ],
                       ],
-                      [130, "*"],
+                      [150, "*"],
                     ),
                   ],
                 },
@@ -2125,23 +2046,17 @@
         pdfMake
           .createPdf(doc)
           .download(
-            `BTCLAND_Phieu_Tinh_Gia_Vinhomes_Saigon_Park_${(p.ma || d.config.name).replace(/\s+/g, "_")}.pdf`,
+            `BTCLAND_Phieu_Tinh_Gia_Vinhomes_Saigon_Park_${d.config.name.replace(/\s+/g, "_")}.pdf`,
           );
       }
-      $("productSelect").addEventListener("change", fillFromProduct);
       [
         "planSelect",
         "vinclubTier",
         "customerDisplayName",
         "staffDisplayName",
       ].forEach((id) => $(id).addEventListener("input", updateUI));
-      [
-        "bookingAmount",
-        "giftAmount",
-        "rawPriceInput",
-        "landPriceInput",
-        "buildPriceInput",
-      ].forEach((id) => {
+
+      ["bookingAmount", "giftAmount", "rawPriceInput"].forEach((id) => {
         $(id).addEventListener("input", () => {
           formatMoneyInput(id);
           updateUI();
@@ -2186,7 +2101,6 @@
           $("leadSubmitBtn").textContent = "Đăng ký";
         }
       });
-      populateProducts();
       updateUI();
     </script>
   </body>
